@@ -1,0 +1,511 @@
+---
+title: "Delay discounting does not predict Body Mass Index: Supplementary Material"
+
+author:
+  - name: "Megan Veillard"
+    affiliation: School of Social Sciences, University of Dundee, UK
+  - name: "Benjamin T. Vincent"
+    affiliation: School of Social Sciences, University of Dundee, UK
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: 
+  bookdown::html_document2:
+    toc: no
+    code_folding: hide
+    number_sections: true
+    link-citations: yes
+  html_document:
+    fig_caption: true
+    code_folding: hide
+bibliography: refs.bib
+urlcolor: blue
+link-citations: yes
+fig_width: 7 
+fig_height: 5
+---
+
+This online supplementary material provides the code underlying the analyses as well as additional results to that presented in the main paper. Note that some results are conducted in JASP and tabular results are imported into this document. We reference to the corresponding JASP files (also available) where appropriate. Click the `code` boxes in order to see the r code underlying the analyses. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(fig.align = "left")
+```
+
+```{r message=FALSE, warning=FALSE}
+library('tidyverse')
+library('ggpubr')
+library('psych')
+
+apatheme = theme_bw(base_size = 12) +
+  theme(panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),
+        panel.border=element_blank(),
+        axis.line=element_line(),
+        text=element_text(family='Helvetica', size = 12),
+        legend.background=element_blank())
+```
+
+
+# Load and process data
+
+```{r message = FALSE, warning = FALSE}
+data <- read_csv('data/all_cleaned_scored.csv') %>% 
+  mutate(sex = factor(sex))
+
+# Create dataframe just with the subset of participants interested in weight loss.
+data_iiwl <- data[data$IWL == 'yes',]
+
+# create sample size strings of "N=XXX" to use as information on the plots
+n_all <- sprintf("N=%d", length(na.omit(data$logk_money)))
+n_iiwl <- sprintf("N=%d", length(na.omit(data$logk_weight)))
+
+# frequency of sex in the data
+sex_freq <- count(data, sex)
+n_female <- sex_freq$n[sex_freq$sex=='female']
+n_male <- sex_freq$n[sex_freq$sex=='male']
+```
+
+When we closed the survey we had a total of 408 respondents. Because this was an unsupervised online questionnaire we took efforts to ensure the data quality was high. While the respondents were all unpaid volunteers, and therefore had some level of intrinsic motivation to complete the questionnaire accurately, we used fairly strict exclusion criteria. We first removed 22 participants on the basis of missing or incorrect responses, or who were under 18. We excluded one participant who did not disclose their sex assigned at birth. In the scoring procedure we calculated the number of responses correctly predicted by the hyperbolic discount  function and corresponding discount tates. We removed participants where we were unable to predict 70% of more of their responses. This lead to 1 participant being exluded on the basis of the MCQ and 3 on the basis of the WCQ. We decided not to exclude participants who always chose the delayed reward. This is most likely due to the limited range of discount rates that the MCQ is sensitive to rather than aberrant responding. 
+
+After participant exclusion we have `r n_all` participants in total (`r n_female` female and `r n_male` male). Of these, `r n_iiwl` reported being interested in weight loss. Because all participants completed the MCQ, we calculated the $\log(k)$ for discounting of money for all `r n_all` participants. Only participants interested in weight loss completed the MCQ, so we were able to calculate the $\log(k)$ for discounting of weight loss for `r n_iiwl` participants. Note that all log discount rates correspond to the natural logarithm.
+
+
+# Exploration of the dataset
+
+## Descriptive statistics
+
+The output below shows some basic descriptive statistics of the key continuous variables of interest.
+```{r}
+# # select just the core variables of interest
+# data %>% 
+#   select(age, bmi, logk_money, logk_weight, stunkard) %>% 
+#   psych::describe()
+
+# temp <- data %>% select(sex, age, bmi, logk_money, logk_weight, stunkard)
+# summary(temp)
+
+data %>%
+  select(sex, age, bmi, logk_money, logk_weight, stunkard) %>%
+  summary()
+```
+
+Now look at the same stats, grouped by sex.
+```{r}
+temp <- data %>% select(sex, age, bmi, logk_money, logk_weight, stunkard)
+by(temp, temp$sex, summary)
+```
+
+The output below shows the correlation matrix (Pearson correlation coefficient) of the core continuous variables of interest.
+
+```{r}
+data %>% 
+  select(age, bmi, logk_money, logk_weight, stunkard) %>% 
+  cor(use="na.or.complete")
+```
+
+## Discounting behaviour
+Figure \@ref(fig:foo) shows the distribution of discount rates for money (top) and weight loss (bottom), split by sex.
+
+```{r foo, warning=FALSE, fig.cap="Stacked histrograms of discount rates for money (top) and weight loss (bottom)"}
+hist_money <- ggplot(data, aes(x=logk_money, fill=sex, color=sex)) +
+  geom_histogram(binwidth=0.5, position="stack", alpha=0.5) +
+  xlim(-10, -1) +
+  apatheme +
+  labs(x="ln(k) money", subtitle = n_all) 
+
+hist_weight <- ggplot(data, aes(x=logk_weight, fill=sex, color=sex)) +
+  geom_histogram(binwidth=0.5, position="stack", alpha=0.5) +
+  xlim(-10, -1) +
+  apatheme +
+  labs(x="ln(k) weight loss", subtitle = n_iiwl)
+
+ggarrange(hist_money, hist_weight, ncol=1, nrow=2)
+```
+
+## Discounting for money versus weight loss
+Figure \@ref(fig:discountingscatter) shows the joint distribution of discount rates for money and weight loss. A Bayesian 1-tailed test for a positive correlation between discount rate types shows decisive evidence for a positive correlation ($BF_{+0}=27,628$). However the effect size is small, with only around 9% of shared variance, $R^2$ = 0.091 (95% CI: 0.034, 0.166) (see `discounting money vs weight.jasp`). 
+
+```{r discountingscatter, fig.cap="Joint distribution between discount rates for money and weight loss. People falling along the diagonal discount money and weight loss at the same amount. We cannot say anything about the exchange rate between weight loss and money because we did not do a cross-commodity discounting test."}
+lnk_by_type <- ggplot(data_iiwl, aes(x=logk_money, y=logk_weight, color=sex)) +
+  geom_point(alpha=0.5) +
+  geom_smooth(method=lm, aes(fill=sex)) +
+  geom_abline(intercept = 0, slope = 1) + 
+  coord_fixed(ratio = 1) +
+  labs(x="ln(k) money", y="ln(k) weight loss", subtitle = n_iiwl) +
+  apatheme +
+  theme(legend.position = c(0.85, 0.2))
+
+lnk_by_type
+
+ggsave(file.path("figs/lnk_by_type.pdf"), 
+       plot = lnk_by_type)
+```
+
+There was no evidence of a different relationship for males and females. We ran a Bayesian ANCOVA to predict `logk_money`, with `sex` as a fixed factor and `logk_weight` as a predictor. We also explored if there was an interaction between sex and discounting for weight loss, and so the full model considered was `logk_money ~ logk_weight + sex + logk_weight * sex`. The best account of the data was given by `logk_money ~ logk_weight`. Adding in a main effect of `sex` is 4 times worse than the best model, counting as substantial evidence against a main effect of `sex`. The evidence against the remaining models is even stronger. 
+
+Overall we can decisively conclude that the different discount rates are correlated, but that they only share approximately 9% of the variance. We can also decisively conclude that there is no main or interaction effect with `sex`, and so the relationship between the different discount rates is identical for both men and women.
+
+![Table 1: Bayesian ANCOVA model and submodels to predict `logk_weight`. We report Bayes Factors (*BF*~01~) relative to the best model (model 1, `logk_money ~ logk_weight`). Model 1 corresponds to model stated in each row. Therefore *BF*~10~ values greater than 1 show evidence _against_ a given model relative to the the best model. See the supplementary file `discounting money vs weight.jasp`.](img/discounting_money_vs_weight.png)
+
+### Predictors of money/weight loss discounting ratio?
+However, it is interesting that there are people who discount money at a faster rate than weight loss and people who discount weight loss at a faster rate than money. This raises the interesting question of whether there is a relationship between the ratio of discount rates and BMI or age. Visually, there is no compelling relationship between either age or BMI and the ratio of the discount rates (see Figure \@ref(fig:discountratio)).
+
+```{r discountratio, fig.width=7, fig.height=4, fig.cap="Visualisation of any relationship between BMI and age on the ratio of discounting weight loss and money."}
+data_iiwl$kratio <- data_iiwl$logk_weight / data_iiwl$logk_money
+
+bmi_kratio <- ggplot(data_iiwl, aes(x=bmi, y=kratio, colour=sex)) +
+  geom_point(alpha=0.5) +
+  geom_smooth(method='lm', aes(fill=sex)) +
+  geom_abline(intercept = 0, slope = 0) + 
+  apatheme +
+  scale_y_continuous(limits=c(0.1, 4),
+                     trans='log',
+                     breaks=c(0.125, 0.25, 0.5, 1, 2, 4)) +
+  labs(x=expression(paste("BMI [", kg/m^2, "]")),
+       y="ln(k) weight loss / ln(k) money",
+       subtitle=n_all) +
+  theme(legend.position = c(0.8, 0.2))
+
+age_kratio <- ggplot(data_iiwl, aes(x=age, y=kratio, colour=sex)) +
+  geom_point(alpha=0.5) +
+  geom_smooth(method='lm', aes(fill=sex)) +
+  geom_abline(intercept = 0, slope = 0) + 
+  apatheme +
+  scale_y_continuous(limits=c(0.1, 4),
+                     trans='log',
+                     breaks=c(0.125, 0.25, 0.5, 1, 2, 4)) +
+  labs(x="age [years]",
+       y="ln(k) weight loss / ln(k) money",
+       subtitle=n_iiwl) +
+  theme(legend.position = c(0.8, 0.2))
+
+ggarrange(bmi_kratio, age_kratio, ncol=2, nrow=1)
+```
+
+We ran a Bayesian ANCOVA with the discount rate ratio as the outcome variable. We included `sex` as a fixed factor, and `age` and `bmi` as covariates, and considered interactions between `sex` and `bmi` and `age`. The best model to explain the data was the null model, indicating that neither sex nor age nor bmi could predict the ratio of discount rates. The next best model was a main effect of `bmi`, however this was slightly worse than the null model at accounting for the data (BF=3.39). All other models were even worse, and so we have convincing evidence that  `sex`, `age`, `bmi` or various interactions are not related to the ration between discount rates for weight loss and money.
+
+![Table 2: Bayes Factors (*BF*~01~) are presented relative to the null model (model 0) such that positive values represent evidence _against_ a given model relative to the null. See the supplementary file `ln_k_ratio.jasp`.](img/discount_ratio.png)
+
+## Body Mass Index
+
+```{r}
+severly_underweight <- sum(data$bmi<17.5)
+underweight <- sum(data$bmi>=17.5 & data$bmi<18.5)
+normalweight <- sum(data$bmi>=18.5 & data$bmi<25)
+preobesity <- sum(data$bmi>=25 & data$bmi<30)
+obese_total <- sum(data$bmi>=30)
+
+Category <- c("Severly underweight",
+              "Underweight", 
+              "Normal", 
+              "Pre-obesity", 
+              "Obese")
+Frequency <- c(severly_underweight,
+               underweight,
+               normalweight,
+               preobesity,
+               obese_total)
+
+bmi_cateogory_table <- tibble(Category, Frequency)
+```
+
+Figure \@ref(fig:bmidistribution) shows the distribution of BMI values based upon World Health Organisation categories. This positively skewed distribution is representative of the BMI distribution seen in large scale surveys [@Humphreys:2000we]. Anorexia requires a clinical diagnosis so we classify those with BMI<17.5 as serverly underweight. Our sample contains a broad range of BMI levels, including `r severly_underweight` severly underweight people and `r obese_total` with obesity, of varying levels of severity. A full breakdown of BMI categories is given in the table below. 
+
+```{r}
+bmi_cateogory_table
+```
+
+```{r bmidistribution, fig.cap="Stacked histograms of BMI of participants in our dataset by sex."}
+bmi_all <- ggplot(data, aes(x=bmi, fill=sex, color=sex)) +
+  geom_histogram(position="stack", alpha=0.5, binwidth=5) +
+  apatheme + 
+  labs(x=expression(paste("BMI [", kg/m^2, "]")), subtitle = n_all)
+
+bmi_iwl <- ggplot(data, aes(x=bmi, fill=IWL, color=IWL)) +
+  geom_histogram(position="stack", alpha=0.5, binwidth=5) +
+  apatheme + 
+  labs(x=expression(paste("BMI [", kg/m^2, "]")), subtitle = n_all)
+
+ggarrange(bmi_all, bmi_iwl, ncol=1, nrow=2)
+```
+
+## BMI by age and sex
+It is known from larger scale surveys [@Sutin:2011ud] that there is a dependence of BMI upon age. This relationship is nonlinear over the entire lifespan, with decreases seen in adolescence following a rise in adult life, with a later decrease beyond the age of around 60. We decided to model the BMI and age relationship as a linear trend based on: a) this being true to a first approximation for our age range of `r min(data$age)`-`r max(data$age)`, b) not having sufficient data at the older age range to accurately estimate a non-linear relationship. Figure \@ref(fig:bmiage) shows clear increases in BMI as a function of age.
+
+```{r, bmiage, warning=FALSE, fig.cap="BMI by age and sex."}
+ggplot(data=data, aes(x=age, y=bmi, colour=sex)) + 
+  geom_point(alpha=0.25) +
+  geom_smooth(method=lm, aes(fill=sex)) + 
+  scale_x_continuous(limits=c(15, 70), 
+                     breaks=c(20, 30, 40, 50, 60, 70)) + 
+  scale_y_continuous(limits=c(12, 65), 
+                     breaks=c(20, 30, 40, 50, 60, 70)) +
+  labs(x="age [years]", 
+       y=expression(paste("BMI [", kg/m^2, "]")),
+       subtitle = n_all) +
+  apatheme + theme(legend.position = c(0.9, 0.9))
+```
+
+```{r}
+bmi_age_plot <- ggplot(data=data, aes(x=age, y=bmi)) + 
+  geom_point(alpha=0.5) +
+  geom_smooth(method=lm, colour='black') + 
+  scale_x_continuous(limits=c(15, 70), 
+                     breaks=c(20, 30, 40, 50, 60, 70)) + 
+  scale_y_continuous(limits=c(12, 65), 
+                     breaks=c(20, 30, 40, 50, 60, 70)) +
+  labs(x="age [years]", 
+       y=expression(paste("BMI [", kg/m^2, "]")),
+       subtitle = n_all) +
+  apatheme + theme(legend.position = c(0.9, 0.9))
+
+bmi_age_plot
+```
+
+
+```{r}
+# make scatter hist
+
+hist_top <- ggplot(data, aes(x=age)) +
+  geom_histogram(binwidth=5, position="stack", alpha=0.5) +
+  scale_x_continuous(limits=c(15, 70), 
+                     breaks=c(20, 30, 40, 50, 60, 70)) +
+  apatheme + theme(legend.position = "none") +
+  labs(x="age [years]")
+
+empty <- ggplot()+geom_point(aes(1,1), colour="white")+
+         theme(axis.ticks=element_blank(), 
+               panel.background=element_blank(), 
+               axis.text.x=element_blank(), axis.text.y=element_blank(),           
+               axis.title.x=element_blank(), axis.title.y=element_blank())
+
+scatter <- bmi_age_plot
+
+hist_right <- ggplot(data, aes(x=bmi)) +
+  geom_histogram(position="stack", alpha=0.5, binwidth=5) +
+  scale_x_continuous(limits=c(12, 65), 
+                     breaks=c(20, 30, 40, 50, 60, 70)) +
+  apatheme + 
+  labs(x=expression(paste("BMI [", kg/m^2, "]"))) +
+  coord_flip() + theme(legend.position = "none")
+
+
+bmi_age_scatterhist <- ggarrange(hist_top, empty,
+                             scatter, hist_right, 
+                             ncol=2, nrow=2, widths=c(3, 1), heights=c(1, 3))
+
+bmi_age_scatterhist
+
+# bmi_age_plot <- grid.arrange(hist_top, empty,
+#                              scatter, hist_right, 
+#                              ncol=2, nrow=2, widths=c(4, 1), heights=c(1, 4))
+
+ggsave(file.path("figs/bmi_age_scatterhist.pdf"),
+       plot = bmi_age_scatterhist)
+```
+
+A Bayesian ANCOVA was run to examine `bmi ~ age + sex + sex*age` and all sub-models. The best model is `bmi ~ age` which had decisive evidence for the main effect of age, as compared to a null model (*BF*=2.395 * 10<sup>17</sup> ). The model including `sex` as a factor as about 8.4 times worse than this model. So there is decisive evidence for a main effect of `age` on `bmi` and substantial evidence for this relationship being the same in men and women in our dataset. Note though that this linear relationship should not necessarily be extrapolated to younger or older ages outside of our observed age range.
+
+![Table 3: We present Bayes Factors *BF*~01~ relative to the best model (model 0 `bmi ~ age`) such that values *BF*~01~ greater than 1 represent evidence _against_ a given model relative to the best model. See the supplementary file `bmi and age.jasp`](img/bmi_age.png)
+
+## Discounting with age
+
+While we did not have any hypotheses about the relationship between age and discount rates, it is worthwhile to explore if there is a relationship here. Figure \@ref(fig:discountingage) shows that there are no compelling relationships between age and discounting of either money or weight loss.
+
+```{r, discountingage, fig.width=7, fig.height=4, warning=FALSE, fig.cap="Lack of relationship between age and discount rates."}
+money <- ggplot(data, aes(x=age, y=logk_money)) +
+  geom_point(alpha=0.5) +
+  geom_smooth(method='lm', colour='black') +
+  geom_abline(intercept = 0, slope = 0) + 
+  apatheme +
+  labs(x="age [years]",
+       y="ln(k) money",
+       subtitle=n_all) +
+  theme(legend.position = c(0.8, 0.2))
+
+weight <- ggplot(data_iiwl, aes(x=age, y=logk_weight)) +
+  geom_point(alpha=0.5) +
+  geom_smooth(method='lm', colour='black') +
+  geom_abline(intercept = 0, slope = 0) + 
+  apatheme +
+  labs(x="age [years]",
+       y="ln(k) weight",
+       subtitle=n_iiwl) +
+  theme(legend.position = c(0.8, 0.2))
+
+ggarrange(money, weight, ncol=2, nrow=1)
+```
+
+This was supported quantitatively. Two Bayesian linear regressions were run, with $\ln(k_{money})$ and $\ln(k_{weight})$ as the outcome variables, respectively. When predicting $\ln(k_{money})$, the data was most likely under the null model, and was 8.8 times less likely with a main effect of age (*BF*~01~=8.88). 
+
+![Table 4: Linear models of logk_money with age as a predictor. Bayes Factors *BF*~01~ are presented relative to the null model (Model 0), such that values of $BF_{01}>1$ mean evidence against age as a main effect. See `discounting_age.jasp`.](img/logkmoney_age.png)
+
+Similarly, when predicting $\ln(k_{weight})$, the data was most likely under the null model, and was 5.6 times less likely with a main effect of age (*BF*~01~=5.606).
+
+![Table 5: Linear models of logk_weight with age as a predictor. Bayes Factors *BF*~01~ are presented relative to the null model (Model 0), such that values of $BF_{01}>1$ mean evidence against age as a main effect. See `discounting_age.jasp`.](img/logkweight_age.png)
+
+
+# Does discounting predict BMI?
+
+One of the core research questions in this study was whether discount rates (for money or for weight loss) could predict BMI. We first present the straightforward correlations between discounting and BMI. We then present the results of an analysis which adjusts for the effects of age and sex. While the first approach is required in order to compare our results to correlations presented in the literature, we argue that the latter approach should be used more. Age and sex clearly influence discounting, and so any claim that discounting influences BMI, should really take both age and sex into account.
+
+## Correlations between discounting and BMI
+
+Many previous studies report correlation coefficients between discount rates and BMI. This is an entirely reasonable analysis to run, but in the next section we argue that future studies need to go further than this. But here we simply ask, what is the correlation between discounting and BMI. Figure \@ref(fig:bmihypothesissimple) explores this visually.
+
+```{r, bmihypothesissimple, fig.width=7, fig.height=4, fig.cap="Lack of relation between bmi and discounting. This lack of relationship holds for discounting of money (left column) and of weight loss (right column)."}
+
+money_bmi <- ggplot(data, aes(logk_money, bmi)) + 
+  geom_point(alpha=0.2) +
+  geom_smooth(method='lm', colour='black') +
+  apatheme +
+  labs(y=expression(paste("BMI [", kg/m^2, "]")), 
+       x="ln(k) money",
+       subtitle=n_all)
+
+weight_bmi <- ggplot(data_iiwl, aes(logk_weight, bmi)) + 
+  geom_point(alpha=0.2) +
+  geom_smooth(method='lm', colour='black') +
+  apatheme +
+  labs(y=expression(paste("BMI [", kg/m^2, "]")), 
+       x="ln(k) weight loss",
+       subtitle=n_iiwl)
+
+bmi_discounting <- ggarrange(money_bmi, weight_bmi, ncol=2, nrow=1)
+
+bmi_discounting
+
+ggsave(file.path("figs/bmi_discounting.pdf"), 
+       plot = bmi_discounting)
+```
+
+A Bayesian regression `bmi ~ logk_money + logk_weight + logk_money * logk_weight` showed that there were no main effects nor an interaction of discount rates. That is, a null intercept only model was the best model. There was significant evidence against the next best model (a main effect of `logk_money`). In other words, we find significant evidence against either discount rate playing a role in BMI.
+
+![Table 6: Does discounting predict bmi? We present Bayes Factors as *BF*~01~ relative to the null model (model 0), such that values of *BF*~01~ greater than one represent evidence against a given model relative to the null model. See `does discounting predict bmi.jasp`.](img/discounting1.png)
+
+We ran a Bayesian correlation to test the hypothesis that there is a correlation between discount rates for money and BMI (see `does discounting predict bmi.jasp`). We found substantial evidence against the hypothesis *BF*~01~=7.997, meaning the data is about 8 times more probable under the null hypothesis. The median Pearson correlation coefficient was R=0.059 [95% CI: -0.041, 0.158].
+
+We ran a Bayesian correlation to test the hypothesis that there is a correlation between discount rates for weight loss and BMI (see `does discounting predict bmi.jasp`). We found strong evidence against the hypothesis *BF*~01~=12.391, meaning the data is about 12 times more probable under the null hypothesis. The median Pearson correlation coefficient was R=0.016 [95% CI: -0.106, 0.137].
+
+## Adjusting for age and sex
+We argue that if the goal is to assess the role of discounting in BMI, then it is critical to account for both age and sex. Failing to do this could mean that different studies would come to different conclusions just by having datasets sample age and sex differently. As we know from previous work, BMI varies as a function of both age and sex [@Sutin:2011ud]. Figure \@ref(fig:bmiage) clearly showed this in our dataset, where men had slightly higher BMI and age was a meaningful predictor of BMI.
+
+What does accounting for age actually mean? If we were to find a main effect of discounting even after removing variance accounted for by age, then this would be evidence that discount rates were predictive of BMI.
+
+We ran a Bayesian ANCOVA, the outcome variable was `bmi` and we included `sex` as a fixed factor. Covariates were `age`, `logk_money` and `logk_weight`. We included interaction terms between `sex` and `age`, `logk_money` and `logk_weight`. The best model was `bmi ~ age`. The fact that all other models have $BF_{10}<1$ (i.e. $BF_{01}>1$) mean that adding additional model terms make the data less likely relative to the `bmi ~ sex + age` model.
+
+We did not include the interaction terms `logk_money * age` or `logk_weight * age` as this would amount to a moderation analysis. Such an analysis was undertaken (in Python code) in order to evaluate the hypothesis that discount rates moderated the rate of BMI gain with age. These results are reported in the main paper as well as the corresponding Python code in the online Supplementary Material 
+
+![Table 7: Does discounting predict BMI when accounting for sex and age? No. The data is most likely under a main effect of `sex` and `age`. Note that we present  Bayes Factors relative to the best model (`bmi ~ age`) and so the fact that *BF*~01~ are all >1 means that there is evendence _against_ these models relative to the best model. For example the data becomes $\sim 4$ times less likely when adding a main effect of `logk_money`. See `does discounting predict bmi.jasp`.](img/discounting2.png)
+
+In summary, and in reference to Table 7, our core findings were:
+
+1. BMI is best accounted for by a main effect of sex, and of age. This data is about $2.395 \times 10^{17}$ more likely than the null model, so this is decisive evidence for the `bmi ~ age` model.
+
+2. We have evidence against main effects of either `logk_money` or `logk_weight`. 
+
+## Summary
+In our first analysis which did not take age or sex into account, we found moderate evidence against main effects of either discount rate on BMI, and strong evidence against an interaction of discount rate types on BMI. This, together with the correlation coefficients and corresponding Bayes Factors suggest discount rates alone are not predictive of BMI.
+Further, in our last analysis which did take age and sex into account, we found very strong evidence that age linearly predicts BMI, and that models incorporating main effects of either discount rate were worse than this `BMI ~ age` model. This provides evidence against the hypothesis that discounting processes might drive behaviours which in turn cause a rate of BMI increase over the lifespan.
+
+
+# Analysis of Stunkard ratings
+
+As well as the objective BMI measure, we also measured the participants subjective belief about their body size via the Stunkard Figure Rating Scale [@Stunkard:1983wm].
+
+## BMI and Stunkard ratings
+
+Figure \@ref(fig:bmistunkard) shows the relationship between BMI and Stunkard score. The Stunkard score is bounded between 1-9, and the Stunkard score saturates in a non-linear manner at very high BMI levels. That is, we seem to have a slight ceiling effect which is causing this subtle non-linear relationship. We fitted this with the function $stunkard = 9 \cdot (1-\exp(-(BMI+BMI_0)/\tau))$, where $\tau$ controls the steepness of the function and $BMI_0$ shifts the function along the x-axis.
+
+```{r, bmistunkard, warning=FALSE, fig.cap="The relationship between BMI and Stunkard score. We show both a linear and a nonlinear fit (see text)."}
+ggplot(data, aes(x=bmi, y=stunkard)) + 
+  geom_point(alpha=0.7)+
+  geom_smooth(method='lm', color='black') +
+  geom_smooth(method = "nls", 
+              formula = y ~ ifelse(x>x0, 9*(1-exp(-(x+x0)/tau)), 1),
+              method.args = list(start=c(tau=50, x0=18)),
+              se=FALSE, fullrange=TRUE, color='black') +
+  #scale_x_continuous(limits=c(0,65)) +
+  scale_y_continuous(limits=c(1,9), breaks=c(1, 2, 3, 4, 5, 6, 7, 8, 9)) +
+  apatheme +
+  labs(x=expression(paste("BMI [", kg/m^2, "]")), 
+       y="Stunkard rating", 
+       subtitle = n_all)
+```
+
+## Does discounting predict subjective weight category?
+We now test whether discounting (of either type) can predict subjective body image as measured by the Stunkard scale. 
+
+```{r, discountingstunkard, fig.width=7, fig.height=4, fig.cap="Stunkard rating as a function of discount rates."}
+
+money_stunkard <- ggplot(data, aes(logk_money, stunkard, color=sex)) + 
+  geom_point(alpha=0.2) +
+  geom_smooth(method='lm', aes(fill=sex)) +
+  #stat_smooth(method = "glm", family = "binomial") +
+  apatheme +
+  labs(y="Stunkard rating", 
+       x="ln(k) money", 
+       subtitle=n_all)+ 
+  theme(legend.position="bottom") +
+  theme(legend.position = c(0.20, 0.15)) +
+  scale_y_continuous(limits=c(1,9), breaks=c(1, 2, 3, 4, 5, 6, 7, 8, 9))
+
+weight_stunkard <- ggplot(data_iiwl, aes(logk_weight, stunkard , color=sex)) + 
+  geom_point(alpha=0.2) +
+  geom_smooth(method='lm', aes(fill=sex)) +
+  #stat_smooth(method = "glm", family = "binomial") + 
+  apatheme +
+  labs(y="Stunkard rating", 
+       x="ln(k) weight loss",
+       subtitle=n_iiwl) +
+  theme(legend.position="bottom") + 
+  theme(legend.position = c(0.20, 0.15)) +
+  scale_y_continuous(limits=c(1,9), breaks=c(1, 2, 3, 4, 5, 6, 7, 8, 9))
+
+ggarrange(money_stunkard, weight_stunkard, ncol=2, nrow=1)
+```
+
+```{r, fig.width=7, fig.height=6 }
+# remake stunkard figures, but no colour by sex
+money_stunkard <- ggplot(data, aes(logk_money, stunkard)) + 
+  geom_point(alpha=0.2) +
+  geom_smooth(method='lm', colour='black') +
+  apatheme +
+  labs(y="Stunkard rating", 
+       x="ln(k) money", 
+       subtitle=n_all)+ 
+  theme(legend.position="bottom") +
+  theme(legend.position = c(0.20, 0.15)) +
+  scale_y_continuous(limits=c(1,9), breaks=c(1, 2, 3, 4, 5, 6, 7, 8, 9))
+
+weight_stunkard <- ggplot(data_iiwl, aes(logk_weight, stunkard)) + 
+  geom_point(alpha=0.2) +
+  geom_smooth(method='lm', colour='black') +
+  apatheme +
+  labs(y="Stunkard rating", 
+       x="ln(k) weight loss",
+       subtitle=n_iiwl) +
+  theme(legend.position="bottom") + 
+  theme(legend.position = c(0.20, 0.15)) +
+  scale_y_continuous(limits=c(1,9), breaks=c(1, 2, 3, 4, 5, 6, 7, 8, 9))
+
+# make combined figure
+bmi_stunkard_discounting <- ggarrange(money_bmi, weight_bmi,
+                                      money_stunkard, weight_stunkard,
+                                      ncol=2, nrow=2)
+ggsave(file.path("figs/bmi_stunkard_discounting.pdf"), 
+       plot = bmi_stunkard_discounting)
+```
+
+A visual inspection (see Figure \@ref(fig:discountingstunkard)) does not reveal any compelling linear relationships. We conducted Bayesian ANCOVA with `stunkard` as our outcome variable, `sex` as a fixed factor, and `logk_money` and `logk_weight` as covariates. The null model was the best model, suggesting none of our variables could predict the SFRS score. There is however some scope for a relationshion here, which might be elucidated in future studies. The Bayes Factors for the next best model only provide anecdotal evidence against a role for sex and discount rates and possibly an interaction between sex and discount rates.
+
+![Table 8: Any predictors of Stunkard scores? We present Bayes Factors *BF*~01~ relative to the best (which is also the null model, model 0) such that values of *BF*~01~ greater than 1 represent evidence _against_ a given model. See `stunkard.jasp`.](img/stunkard.png)
+
+Based upon the descriptive statistics reported above, broken down by sex, we see that the average Stunkard score is marginally higher for women (4.7) than men (4.5).
+
+
+# References {-}
+
+```{r bib, eval=FALSE, include=FALSE}
+# create a bib file for the R packages used in this document
+knitr::write_bib(c('base', 'rmarkdown'), file = 'all_papers.bib')
+```

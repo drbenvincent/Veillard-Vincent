@@ -1,0 +1,4 @@
+,study,R,N,pub_year,discount_measure,Notes,effect_size,effect_size_est_mean,effect_size_est_HDI_lower,effect_size_est_HDI_upper
+0,Our study,0.067,257.0,2019.0,lnk,,0.067,,,
+1,Lim & Bruce (2015),0.13,42.0,2015.0,lnk,,0.13,,,
+2,Meta-analytic result,,,,,,,0.0741629822105907,-0.03364607373412665,0.18748923695191078

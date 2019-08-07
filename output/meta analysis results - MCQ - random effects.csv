@@ -1,0 +1,22 @@
+,study,R,N,pub_year,in_amlung2016,bmi_measure,discount_measure,discount_location,Notes,reverse_effect_size,effect_size,effect_size_est_mean,effect_size_est_HDI_lower,effect_size_est_HDI_upper
+0,Appelhans et al (2011),-0.13,62.0,2011.0,yes,,AUC,,,True,0.13,0.13802960894075023,-0.0489277179972064,0.3218457816401385
+1,Borghans & Golsteyn (2006),0.096,2059.0,2006.0,yes,,k,,seemingly used k not ln(k) scores,False,0.096,0.0974130012934558,0.055599912334818376,0.1396807858961321
+2,Brace & Yeomans (2016),0.3,80.0,2016.0,yes,,AUC,table 3,reversed effect size due to AUC measure,True,-0.3,-0.12203171235506827,-0.3181506347157461,0.07161231518317485
+3,Chabris et al (2008) cognition study,0.24,103.0,2008.0,yes,,k or lnk,,R-squared reported. We converted to R,False,0.24,0.2078427946783321,0.05483852809964337,0.3612879597223791
+4,Chabris et al (2008) web study,0.17600000000000002,326.0,2008.0,yes,,k or lnk,,R-squared reported. We converted to R,False,0.17600000000000002,0.17191440981721134,0.07447050920531735,0.2702012368430754
+5,Chabris et al (2008) weight study,0.28,126.0,2008.0,yes,,k or lnk,,R-squared reported. We converted to R,False,0.28,0.2404868411744769,0.10217752097332576,0.38395343800169335
+6,Dassen et al (2015),0.24,151.0,2015.0,yes,,lnk,,"only using the MCQ result, not MCQ-snack",False,0.24,0.21562678579503003,0.07897023126813932,0.34572979484636374
+7,Duckworth et al (2010),0.22,105.0,2010.0,yes,,composite,,Composite self-control score of Kirby and real money discounting task (manually reversed sign of effect size),False,0.22,0.19501576126154185,0.04241989185962907,0.3450478071713531
+8,Epstein et al (2003) computer measure,-0.057,78.0,2003.0,yes,,lnk,,,False,-0.057,0.027820465145490362,-0.14946755586837224,0.2058512329946272
+9,Epstein et al (2014),-0.20800000000000002,199.0,2014.0,yes,,AUC,,reversed effect size due to AUC measure,True,0.20800000000000002,0.19456795347179856,0.07603374473072737,0.31587131569384963
+10,Garza et al (2013),-0.214,478.0,2013.0,yes,,AUC,,reversed effect size due to AUC measure,True,0.214,0.20693459203959902,0.12412329851919009,0.28848043345937785
+11,Hendrickson et al (2015),-0.02,144.0,2015.0,yes,,lnk,Table 3,Took adjusting amount score as this is more accurate then MCQ,False,-0.02,0.026577448309852706,-0.1155567632663507,0.17247761484707463
+12,Ikeda et al (2010),0.38299999999999995,2987.0,2010.0,yes,,k,,seemingly used k not ln(k) scores,False,0.38299999999999995,0.37882864745093237,0.3482902031543037,0.4088931865514491
+13,Kishinevsky et al (2012),0.0,19.0,2012.0,yes,,lnk,,"Didnt report R, just say that it is non-significant",False,0.0,0.1103046656973286,-0.1329666559421573,0.35918416494947725
+14,Lim & Bruce (2015),0.15,42.0,2015.0,yes,,lnk,,,False,0.15,0.14776859486838706,-0.056590964557503495,0.3543347001883533
+15,Lu et al (2014) boys,-0.23,48.0,2014.0,yes,,AUC,,reversed effect size due to AUC measure,True,0.23,0.1855273859257281,-0.010028346204390392,0.3792317167966838
+16,Lu et al (2014) girls,-0.39,39.0,2014.0,yes,,AUC,,reversed effect size due to AUC measure,True,0.39,0.25064546038648866,0.044978029432065046,0.4559466435029985
+17,Stoeckel et al (2013),0.0,24.0,2013.0,yes,,lnk,,"Didnt report R, just say that it is non-significant",False,0.0,0.10261259349909813,-0.13977090258905633,0.3388978400796484
+18,Stojek et al (2014),0.06,108.0,2014.0,yes,,k,,seemingly used k not ln(k) scores,False,0.06,0.08925279543977233,-0.06811107192135639,0.24587289142384688
+19,The Present Study,0.067,381.0,2019.0,no,,lnk,,,False,0.067,0.07718229641907162,-0.0193363126283642,0.16958694753470474
+20,Meta-analytic result,,,,,,,,,,,0.14856522431712518,0.07028672380319456,0.22408139033121754

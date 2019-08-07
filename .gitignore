@@ -1,0 +1,8 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.DS_Store
+__pycache__/
+.ipynb_checkpoints/
+data/mcq_wcq_scoring/plots/*

@@ -1,0 +1,23 @@
+﻿study,R,N,pub_year,in_amlung2016,bmi_measure,discount_measure,discount_location,Notes
+Appelhans et al (2011),-0.13,62,2011,yes,,AUC,,
+Appelhans et al (2012),,78,2012,yes,,AUC,,correlation coefficient not reported
+Borghans & Golsteyn (2006),0.096,2059,2006,yes,,k,,seemingly used k not ln(k) scores
+Brace & Yeomans (2016),0.3,80,2016,yes,,AUC,table 3,reversed effect size due to AUC measure
+Chabris et al (2008) cognition study,0.24,103,2008,yes,,k or lnk,,R-squared reported. We converted to R
+Chabris et al (2008) web study,0.176,326,2008,yes,,k or lnk,,R-squared reported. We converted to R
+Chabris et al (2008) weight study,0.28,126,2008,yes,,k or lnk,,R-squared reported. We converted to R
+Dassen et al (2015),0.24,151,2015,yes,,lnk,,"only using the MCQ result, not MCQ-snack"
+Duckworth et al (2010),0.22,105,2010,yes,,composite,,Composite self-control score of Kirby and real money discounting task (manually reversed sign of effect size)
+Epstein et al (2003) computer measure,-0.057,78,2003,yes,,lnk,,
+Epstein et al (2014),-0.208,199,2014,yes,,AUC,,reversed effect size due to AUC measure
+Garza et al (2013),-0.214,478,2013,yes,,AUC,,reversed effect size due to AUC measure
+Hendrickson et al (2015),-0.02,144,2015,yes,,lnk,Table 3,Took adjusting amount score as this is more accurate then MCQ
+Ikeda et al (2010),0.383,2987,2010,yes,,k,,seemingly used k not ln(k) scores
+Kishinevsky et al (2012),0,19,2012,yes,,lnk,,"Didnt report R, just say that it is non-significant"
+Lim & Bruce (2015),0.15,42,2015,yes,,lnk,,
+Lu et al (2014) boys,-0.23,48,2014,yes,,AUC,,reversed effect size due to AUC measure
+Lu et al (2014) girls,-0.39,39,2014,yes,,AUC,,reversed effect size due to AUC measure
+Schiff et al (2015),,,,,,,,Correlate log discount rates (FOR FOOD REWARD) and BMI.
+Stoeckel et al (2013),0,24,2013,yes,,lnk,,"Didnt report R, just say that it is non-significant"
+Stojek et al (2014),0.06,108,2014,yes,,k,,seemingly used k not ln(k) scores
+The Present Study,0.067,381,2019,no,,lnk,,
