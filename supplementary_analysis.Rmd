@@ -140,7 +140,7 @@ ggsave(file.path("figs/lnk_by_type.pdf"),
        plot = lnk_by_type)
 ```
 
-There was no evidence of a different relationship for males and females. We ran a Bayesian ANCOVA to predict `logk_money`, with `sex` as a fixed factor and `logk_weight` as a predictor. We also explored if there was an interaction between sex and discounting for weight loss, and so the full model considered was `logk_money ~ logk_weight + sex + logk_weight * sex`. The best account of the data was given by `logk_money ~ logk_weight`. Adding in a main effect of `sex` is 4 times worse than the best model, counting as substantial evidence against a main effect of `sex`. The evidence against the remaining models is even stronger. 
+There was no evidence of a different relationship for males and females. We ran a Bayesian ANCOVA to predict `logk_money`, with `sex` as a fixed factor and `logk_weight` as a predictor. We also explored if there was an interaction between sex and discounting for weight loss, and so the full model considered was `logk_money ~ logk_weight + sex + logk_weight:sex`. The best account of the data was given by `logk_money ~ logk_weight`. Adding in a main effect of `sex` is 4 times worse than the best model, counting as substantial evidence against a main effect of `sex`. The evidence against the remaining models is even stronger. 
 
 Overall we can decisively conclude that the different discount rates are correlated, but that they only share approximately 9% of the variance. We can also decisively conclude that there is no main or interaction effect with `sex`, and so the relationship between the different discount rates is identical for both men and women.
 
@@ -303,7 +303,7 @@ ggsave(file.path("figs/bmi_age_scatterhist.pdf"),
        plot = bmi_age_scatterhist)
 ```
 
-A Bayesian ANCOVA was run to examine `bmi ~ age + sex + sex*age` and all sub-models. The best model is `bmi ~ age` which had decisive evidence for the main effect of age, as compared to a null model (*BF*=2.395 * 10<sup>17</sup> ). The model including `sex` as a factor as about 8.4 times worse than this model. So there is decisive evidence for a main effect of `age` on `bmi` and substantial evidence for this relationship being the same in men and women in our dataset. Note though that this linear relationship should not necessarily be extrapolated to younger or older ages outside of our observed age range.
+A Bayesian ANCOVA was run to examine `bmi ~ age + sex + sex:age` and all sub-models. The best model is `bmi ~ age` which had decisive evidence for the main effect of age, as compared to a null model (*BF*=2.395 * 10<sup>17</sup> ). The model including `sex` as a factor as about 8.4 times worse than this model. So there is decisive evidence for a main effect of `age` on `bmi` and substantial evidence for this relationship being the same in men and women in our dataset. Note though that this linear relationship should not necessarily be extrapolated to younger or older ages outside of our observed age range.
 
 ![Table 3: We present Bayes Factors *BF*~01~ relative to the best model (model 0 `bmi ~ age`) such that values *BF*~01~ greater than 1 represent evidence _against_ a given model relative to the best model. See the supplementary file `bmi and age.jasp`](img/bmi_age.png)
 
@@ -378,7 +378,7 @@ ggsave(file.path("figs/bmi_discounting.pdf"),
        plot = bmi_discounting)
 ```
 
-A Bayesian regression `bmi ~ logk_money + logk_weight + logk_money * logk_weight` showed that there were no main effects nor an interaction of discount rates. That is, a null intercept only model was the best model. There was significant evidence against the next best model (a main effect of `logk_money`). In other words, we find significant evidence against either discount rate playing a role in BMI.
+A Bayesian regression `bmi ~ logk_money + logk_weight + logk_money:logk_weight` showed that there were no main effects nor an interaction of discount rates. That is, a null intercept only model was the best model. There was significant evidence against the next best model (a main effect of `logk_money`). In other words, we find significant evidence against either discount rate playing a role in BMI.
 
 ![Table 6: Does discounting predict bmi? We present Bayes Factors as *BF*~01~ relative to the null model (model 0), such that values of *BF*~01~ greater than one represent evidence against a given model relative to the null model. See `does discounting predict bmi.jasp`.](img/discounting1.png)
 
@@ -396,7 +396,7 @@ We have anecdotal evidence against a main effect of `logk_money` _or_ `logk_weig
 
 ![Table 7: Does discounting predict BMI when accounting for age? No. The data is most likely under a main effect of `age`. Note that we present Bayes Factors relative to the best model (`bmi ~ age`) and so the fact that *BF*~01~ are all >1 means that there is evendence _against_ these models relative to the best model. For example the data becomes $\sim 5.3$ times less likely when adding a main effect of `logk_money`. See `does discounting predict bmi.jasp`.](img/discounting2.png)
 
-We did not include the interaction terms `logk_money * age` or `logk_weight * age` as this would amount to a moderation analysis. We reserve this for evaluation of our 'rate of gain' hypothesis - this was undertaken (in Python code). Those results are reported in the main paper as well as the corresponding Python code in the online Supplementary Material.
+We did not include the interaction terms `logk_money:age` or `logk_weight:age` as this would amount to a moderation analysis. We reserve this for evaluation of our 'rate of gain' hypothesis - this was undertaken (in Python code). Those results are reported in the main paper as well as the corresponding Python code in the online Supplementary Material.
 
 
 In summary, and in reference to Table 7, our core findings were:
